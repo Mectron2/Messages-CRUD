@@ -1,45 +1,84 @@
-import express, { type Request, type Response } from 'express';
+import express, { type Request, type Response, type NextFunction } from 'express';
 import Message from './Message.js';
 import type MessageDto from './MessageDto.js';
 
 const app = express();
 const PORT = 3000;
 
-let messages: Message[] = [];
-
 app.use(express.json());
 
-app.post('/messages', (req: Request, res: Response) => {
-    const messageDto = req.body as MessageDto;
+class MessageService {
+    private messages: Message[] = [];
 
-    const newMessage = Message.fromDto(messageDto);
-    messages.push(newMessage);
+    add(dto: MessageDto) {
+        const message = Message.fromDto(dto);
+        this.messages.push(message);
+        return message;
+    }
 
-    res.status(201).json(newMessage);
-});
+    getAllSorted() {
+        return this.messages
+            .slice()
+            .sort((a, b) => b.getCreatedAt().getTime() - a.getCreatedAt().getTime());
+    }
 
-app.get('/messages', (_req: Request, res: Response) => {
-    const sortedMessages = messages
-        .slice()
-        .sort((a, b) => b.getCreatedAt().getTime() - a.getCreatedAt().getTime());
+    findById(id: number) {
+        return this.messages.find((m) => m.getId() === id) ?? null;
+    }
 
-    res.json(sortedMessages);
-});
+    findIndexById(id: number) {
+        return this.messages.findIndex((m) => m.getId() === id);
+    }
 
-app.delete('/messages/:id', (req: Request, res: Response) => {
-    const idParam = req.params.id;
-    if (!idParam || isNaN(parseInt(idParam, 10))) {
+    deleteByIndex(index: number) {
+        this.messages.splice(index, 1);
+    }
+}
+
+const store = new MessageService();
+
+function parseIdParam(req: Request, res: Response, next: NextFunction) {
+    const raw = req.params.id;
+    const id = Number(raw);
+
+    if (!Number.isInteger(id) || id <= 0) {
         return res.status(400).json({ error: 'Invalid message ID' });
     }
 
-    const id = parseInt(idParam, 10);
-    const index = messages.findIndex((message) => message.getId() === id);
+    res.locals.id = id;
+    next();
+}
 
-    if (index === -1) {
+function loadMessage(_req: Request, res: Response, next: NextFunction) {
+    const id: number = res.locals.id;
+    const message = store.findById(id);
+
+    if (!message) {
         return res.status(404).json({ error: 'Message not found' });
     }
 
-    messages.splice(index, 1);
+    res.locals.message = message;
+    res.locals.index = store.findIndexById(id);
+    next();
+}
+
+app.get('/messages', (_req: Request, res: Response) => {
+    res.json(store.getAllSorted());
+});
+
+app.get('/messages/:id', parseIdParam, loadMessage, (_req: Request, res: Response) => {
+    res.json(res.locals.message);
+});
+
+app.post('/messages', (req: Request, res: Response) => {
+    const dto = req.body as MessageDto;
+    const newMessage = store.add(dto);
+    res.status(201).json(newMessage);
+});
+
+app.delete('/messages/:id', parseIdParam, loadMessage, (_req: Request, res: Response) => {
+    const index: number = res.locals.index;
+    store.deleteByIndex(index);
     res.status(204).send();
 });
 
