@@ -3,8 +3,8 @@ import type MessageDto from './MessageDto.js';
 export default class Message {
     private static lastId = 0;
     private readonly id: number;
-    private readonly userId: number;
-    private readonly text: string;
+    private userId: number;
+    private text: string;
     private readonly createdAt: Date;
 
     constructor(userId: number, text: string) {
@@ -20,6 +20,20 @@ export default class Message {
 
     getCreatedAt(): Date {
         return this.createdAt;
+    }
+
+    setUserId(userId: number): void {
+        if (userId <= 0) {
+            throw new Error('Invalid userId');
+        }
+        this.userId = userId;
+    }
+
+    setText(text: string): void {
+        if (!text || text.trim() === '') {
+            throw new Error('Text cannot be empty');
+        }
+        this.text = text;
     }
 
     static fromDto(dto: MessageDto): Message {

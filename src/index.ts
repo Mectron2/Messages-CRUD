@@ -33,9 +33,15 @@ class MessageService {
     deleteByIndex(index: number) {
         this.messages.splice(index, 1);
     }
+
+    updateMessage(message: Message, dto: Partial<MessageDto>) {
+        if (dto.userId !== undefined) message.setUserId(dto.userId);
+        if (dto.text !== undefined) message.setText(dto.text);
+        return message;
+    }
 }
 
-const store = new MessageService();
+const messageService = new MessageService();
 
 function parseIdParam(req: Request, res: Response, next: NextFunction) {
     const raw = req.params.id;
@@ -51,19 +57,19 @@ function parseIdParam(req: Request, res: Response, next: NextFunction) {
 
 function loadMessage(_req: Request, res: Response, next: NextFunction) {
     const id: number = res.locals.id;
-    const message = store.findById(id);
+    const message = messageService.findById(id);
 
     if (!message) {
         return res.status(404).json({ error: 'Message not found' });
     }
 
     res.locals.message = message;
-    res.locals.index = store.findIndexById(id);
+    res.locals.index = messageService.findIndexById(id);
     next();
 }
 
 app.get('/messages', (_req: Request, res: Response) => {
-    res.json(store.getAllSorted());
+    res.json(messageService.getAllSorted());
 });
 
 app.get('/messages/:id', parseIdParam, loadMessage, (_req: Request, res: Response) => {
@@ -72,14 +78,20 @@ app.get('/messages/:id', parseIdParam, loadMessage, (_req: Request, res: Respons
 
 app.post('/messages', (req: Request, res: Response) => {
     const dto = req.body as MessageDto;
-    const newMessage = store.add(dto);
+    const newMessage = messageService.add(dto);
     res.status(201).json(newMessage);
 });
 
 app.delete('/messages/:id', parseIdParam, loadMessage, (_req: Request, res: Response) => {
     const index: number = res.locals.index;
-    store.deleteByIndex(index);
+    messageService.deleteByIndex(index);
     res.status(204).send();
+});
+
+app.patch('/messages/:id', parseIdParam, loadMessage, (req: Request, res: Response) => {
+    const dto = req.body as Partial<MessageDto>;
+    const updatedMessage = messageService.updateMessage(res.locals.message, dto);
+    res.json(updatedMessage);
 });
 
 app.listen(PORT, () => {
