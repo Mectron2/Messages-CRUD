@@ -2,16 +2,23 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import type MessageDto from './MessageDto.js';
 import ErrorMessage from './ErrorMessage.js';
 import MessageService from './MessageService.js';
+import cors from 'cors';
 import { parseIdParam, loadMessage, parseLimitAndStartQueryParams } from './middlewares.js';
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+app.use(
+    cors({
+        origin: 'http://localhost:63342',
+        methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    })
+);
 
 export const messageService = new MessageService();
 
-app.get('/messages', parseLimitAndStartQueryParams, (req: Request, res: Response) => {
+app.get('/messages', parseLimitAndStartQueryParams, (_req: Request, res: Response) => {
     res.json(messageService.getSorted(res.locals.limit, res.locals.start));
 });
 
