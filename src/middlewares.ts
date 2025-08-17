@@ -15,8 +15,9 @@ export function parseIdParam(req: Request, res: Response, next: NextFunction) {
 }
 
 export function parseLimitAndStartQueryParams(req: Request, res: Response, next: NextFunction) {
-    const limit = Number(req.query.limit) ?? 10;
-    const start = Number(req.query.start) || 0;
+    const limit = req.query.limit !== undefined ? Number(req.query.limit) : 10;
+    const start = req.query.start !== undefined ? Number(req.query.start) : 0;
+
     if (isNaN(limit) || limit <= 0) {
         return next(new ErrorMessage(400, `Invalid limit parameter: ${req.query.limit}`));
     }
