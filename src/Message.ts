@@ -1,4 +1,5 @@
 import type MessageDto from './MessageDto.js';
+import ErrorMessage from './ErrorMessage.js';
 
 export default class Message {
     private static lastId = 0;
@@ -24,21 +25,21 @@ export default class Message {
 
     setUserId(userId: number): void {
         if (userId <= 0) {
-            throw new Error('Invalid userId');
+            throw new ErrorMessage(400, 'Invalid userId');
         }
         this.userId = userId;
     }
 
     setText(text: string): void {
         if (!text || text.trim() === '') {
-            throw new Error('Text cannot be empty');
+            throw new ErrorMessage(400, 'Text cannot be empty');
         }
         this.text = text;
     }
 
     static fromDto(dto: MessageDto): Message {
         if (!dto.userId || !dto.text) {
-            throw new Error('Missing userId or text field');
+            throw new ErrorMessage(400, 'Missing userId or text field');
         }
         return new Message(dto.userId, dto.text);
     }
