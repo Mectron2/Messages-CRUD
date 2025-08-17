@@ -1,6 +1,6 @@
-import type { NextFunction, Request, Response } from "express";
-import ErrorMessage from "./ErrorMessage.js";
-import { messageService } from "./index.js";
+import type { NextFunction, Request, Response } from 'express';
+import ErrorMessage from './ErrorMessage.js';
+import { messageService } from './index.js';
 
 export function parseIdParam(req: Request, res: Response, next: NextFunction) {
     const raw = req.params.id;
@@ -11,6 +11,22 @@ export function parseIdParam(req: Request, res: Response, next: NextFunction) {
     }
 
     res.locals.id = id;
+    next();
+}
+
+export function parseLimitAndStartQueryParams(req: Request, res: Response, next: NextFunction) {
+    const limit = Number(req.query.limit) ?? 10;
+    const start = Number(req.query.start) || 0;
+    if (isNaN(limit) || limit <= 0) {
+        return next(new ErrorMessage(400, `Invalid limit parameter: ${req.query.limit}`));
+    }
+
+    if (isNaN(start) || start < 0) {
+        return next(new ErrorMessage(400, `Invalid start parameter: ${req.query.start}`));
+    }
+
+    res.locals.start = start;
+    res.locals.limit = limit;
     next();
 }
 

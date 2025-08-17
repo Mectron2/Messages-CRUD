@@ -13,10 +13,10 @@ export default class MessageService {
         return message;
     }
 
-    getAllSorted() {
+    getSorted(limit: number = 10, start: number = 0) {
         return this.messages
-            .slice()
-            .sort((a, b) => b.getCreatedAt().getTime() - a.getCreatedAt().getTime());
+            .sort((a, b) => b.getCreatedAt().getTime() - a.getCreatedAt().getTime())
+            .slice(start, start + limit);
     }
 
     findById(id: number) {

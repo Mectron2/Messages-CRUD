@@ -2,7 +2,7 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import type MessageDto from './MessageDto.js';
 import ErrorMessage from './ErrorMessage.js';
 import MessageService from './MessageService.js';
-import { parseIdParam, loadMessage } from './middlewares.js';
+import { parseIdParam, loadMessage, parseLimitAndStartQueryParams } from './middlewares.js';
 
 const app = express();
 const PORT = 3000;
@@ -11,8 +11,8 @@ app.use(express.json());
 
 export const messageService = new MessageService();
 
-app.get('/messages', (_req: Request, res: Response) => {
-    res.json(messageService.getAllSorted());
+app.get('/messages', parseLimitAndStartQueryParams, (req: Request, res: Response) => {
+    res.json(messageService.getSorted(res.locals.limit, res.locals.start));
 });
 
 app.get('/messages/:id', parseIdParam, loadMessage, (_req: Request, res: Response) => {
