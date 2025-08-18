@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import ErrorMessage from './ErrorMessage.js';
-import { messageService } from './index.js';
+import { messageService } from './MessageController.js';
 
 export function parseIdParam(req: Request, res: Response, next: NextFunction) {
     const raw = req.params.id;
