@@ -34,31 +34,31 @@ export default class MessageService {
         new Message(1, 'Extra message to test pagination.'),
     ];
 
-    add(dto: MessageDto) {
+    add(dto: MessageDto): Message {
         const message = Message.fromDto(dto);
         this.messages.push(message);
         return message;
     }
 
-    getSorted(limit: number = 10, start: number = 0) {
+    getSorted(limit: number = 10, start: number = 0): Message[] {
         return this.messages
             .sort((a, b) => b.getCreatedAt().getTime() - a.getCreatedAt().getTime())
             .slice(start, start + limit);
     }
 
-    findById(id: number) {
+    findById(id: number): Message | null {
         return this.messages.find((m) => m.getId() === id) ?? null;
     }
 
-    findIndexById(id: number) {
+    findIndexById(id: number): number {
         return this.messages.findIndex((m) => m.getId() === id);
     }
 
-    deleteByIndex(index: number) {
+    deleteByIndex(index: number): void {
         this.messages.splice(index, 1);
     }
 
-    updateMessage(message: Message, dto: UpdateMessageDto) {
+    updateMessage(message: Message, dto: UpdateMessageDto): Message {
         message.setText(dto.text);
         return message;
     }

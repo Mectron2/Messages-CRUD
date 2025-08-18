@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import ErrorMessage from './ErrorMessage.js';
 import { messageService } from './MessageController.js';
 
-export function parseIdParam(req: Request, res: Response, next: NextFunction) {
+export function parseIdParam(req: Request, res: Response, next: NextFunction): void {
     const raw = req.params.id;
     const id = Number(raw);
 
@@ -14,7 +14,11 @@ export function parseIdParam(req: Request, res: Response, next: NextFunction) {
     next();
 }
 
-export function parseLimitAndStartQueryParams(req: Request, res: Response, next: NextFunction) {
+export function parseLimitAndStartQueryParams(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void {
     const limit = req.query.limit !== undefined ? Number(req.query.limit) : 10;
     const start = req.query.start !== undefined ? Number(req.query.start) : 0;
 
@@ -31,7 +35,7 @@ export function parseLimitAndStartQueryParams(req: Request, res: Response, next:
     next();
 }
 
-export function loadMessage(_req: Request, res: Response, next: NextFunction) {
+export function loadMessage(_req: Request, res: Response, next: NextFunction): void {
     const id: number = res.locals.id;
     const message = messageService.findById(id);
 
