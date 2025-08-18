@@ -23,13 +23,6 @@ export default class Message {
         return this.createdAt;
     }
 
-    setUserId(userId: number): void {
-        if (userId <= 0) {
-            throw new ErrorMessage(400, 'Invalid userId');
-        }
-        this.userId = userId;
-    }
-
     setText(text: string): void {
         if (!text || text.trim() === '') {
             throw new ErrorMessage(400, 'Text cannot be empty');

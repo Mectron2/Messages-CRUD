@@ -1,5 +1,6 @@
 import type MessageDto from './MessageDto.js';
 import Message from './Message.js';
+import type UpdateMessageDto from './UpdateMessageDto.js';
 
 export default class MessageService {
     private messages: Message[] = [
@@ -57,9 +58,8 @@ export default class MessageService {
         this.messages.splice(index, 1);
     }
 
-    updateMessage(message: Message, dto: Partial<MessageDto>) {
-        if (dto.userId !== undefined) message.setUserId(dto.userId);
-        if (dto.text !== undefined) message.setText(dto.text);
+    updateMessage(message: Message, dto: UpdateMessageDto) {
+        message.setText(dto.text);
         return message;
     }
 }

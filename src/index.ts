@@ -4,6 +4,7 @@ import ErrorMessage from './ErrorMessage.js';
 import MessageService from './MessageService.js';
 import cors from 'cors';
 import { parseIdParam, loadMessage, parseLimitAndStartQueryParams } from './middlewares.js';
+import type UpdateMessageDto from './UpdateMessageDto.js';
 
 const app = express();
 const PORT = 3000;
@@ -39,12 +40,16 @@ app.delete('/messages/:id', parseIdParam, loadMessage, (_req: Request, res: Resp
 });
 
 app.patch('/messages/:id', parseIdParam, loadMessage, (req: Request, res: Response) => {
-    const dto = req.body as Partial<MessageDto>;
+    const dto = req.body as UpdateMessageDto;
     const updatedMessage = messageService.updateMessage(res.locals.message, dto);
     res.json(updatedMessage);
 });
 
 app.use((err: ErrorMessage, _req: Request, res: Response, _next: NextFunction) => {
+    if (err && 'body' in err) {
+        return res.status(400).json({ error: 'Invalid JSON body' });
+    }
+
     res.status(err.getStatusCode() || 500).json({
         error: err.getErrorMessage() || 'Internal Server Error',
     });
